@@ -1,6 +1,6 @@
 # GoTools
 
-[![CI](https://github.com/Waddenn/EXAMEN---PROJET-GO/actions/workflows/ci.yml/badge.svg)](https://github.com/Waddenn/EXAMEN---PROJET-GO/actions/workflows/ci.yml)
+[![CI](https://github.com/Waddenn/gotools-devops-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Waddenn/gotools-devops-cli/actions/workflows/ci.yml)
 
 Outil en ligne de commande en Go pour le projet M1 DevOps.
 
@@ -81,7 +81,7 @@ audit/audit.go          journalisation des actions sensibles
 - Le menu est volontairement simple et lisible, sans framework CLI.
 - Certaines fonctions dépendent de l'environnement (`docker`, `ps`, `df`, etc.).
 - Les actions sensibles (arret de processus, lock, chmod) sont tracees dans `out/audit.log`.
-- Une CI GitHub Actions a ete ajoutee (verification format/build/vet + smoke test CLI + controle des livrables) pour fiabiliser les pushes, meme si ce n'etait pas une contrainte obligatoire du sujet.
+- Une CI GitHub Actions a ete ajoutee (verification format/build/vet + smoke test CLI + controle des livrables) avec execution sur tags de release (`v*`, `release-*`) et declenchement manuel.
 
 ## Description du travail effectue
 
