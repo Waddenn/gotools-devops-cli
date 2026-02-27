@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  go-ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Check formatting (gofmt)
+        run: |
+          UNFORMATTED=$(gofmt -l .)
+          if [ -n "$UNFORMATTED" ]; then
+            echo "Fichiers non formates :"
+            echo "$UNFORMATTED"
+            exit 1
+          fi
+
+      - name: Static checks (go vet)
+        run: go vet ./...
+
+      - name: Build
+        run: go build ./...
+
+      - name: Build CLI binary
+        run: go build -o gotools .
+
+      - name: Smoke test (menu starts and exits)
+        run: |
+          printf 'Q\n' | ./gotools --config config.json > smoke.log
+          grep -q "Menu principal" smoke.log
+          grep -q "Au revoir" smoke.log
+
+      - name: Check deliverables structure
+        run: |
+          test -f README.md
+          test -f config.txt
+          test -f config.json
+          test -f main.go
+          test -d data
+          test -d out
+
+      - name: Check expected generated files (out/)
+        run: |
+          test -f out/filtered.txt
+          test -f out/filtered_not.txt
+          test -f out/head.txt
+          test -f out/tail.txt
+          test -f out/report.txt
+          test -f out/index.txt
+          test -f out/merged.txt
+          test -f out/audit.log
+

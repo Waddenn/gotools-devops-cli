@@ -1,0 +1,10 @@
+Kubernetes orchestre les conteneurs a grande echelle.
+Terraform permet de gerer l'infrastructure as code.
+Ansible automatise la configuration des serveurs.
+Jenkins est un serveur d'integration continue.
+Git est le systeme de controle de version le plus utilise.
+GitHub et GitLab offrent des plateformes collaboratives.
+Le cloud computing transforme l'industrie informatique.
+AWS, Azure et GCP sont les principaux fournisseurs cloud.
+La conteneurisation simplifie le deploiement des applications.
+Les microservices decoupent les applications en services independants.

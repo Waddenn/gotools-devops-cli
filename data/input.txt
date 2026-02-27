@@ -1,0 +1,15 @@
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
+Nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.
+Eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident.
+Sunt in culpa qui officia deserunt mollit anim id est laborum.
+Le langage Go est performant et simple.
+Go utilise des goroutines pour la concurrence.
+Les channels permettent la communication entre goroutines.
+Docker est un outil de conteneurisation populaire.
+DevOps combine le developpement et les operations.
+La securite est un aspect fondamental du developpement.
+Le monitoring permet de surveiller les applications en production.

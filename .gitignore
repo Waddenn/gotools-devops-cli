@@ -1,0 +1,16 @@
+/gotools
+/gotools_test
+*.exe
+*.out
+
+*.test
+*.prof
+*.pprof
+coverage.out
+
+.DS_Store
+
+data/secureops_test_tmp.txt
+
+out/testlogs/
+out/
