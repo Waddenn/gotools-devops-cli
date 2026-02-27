@@ -2,6 +2,7 @@ package procops
 
 import (
 	"bufio"
+	"encoding/csv"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -16,24 +17,15 @@ type Process struct {
 	Name string
 }
 
-// ListProcesses recupere les processus via la commande adaptee a l'OS
+// ListProcesses recupere les processus via la commande adaptee a l'OS.
 func ListProcesses(topN int) ([]Process, error) {
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("tasklist", "/FO", "CSV", "/NH")
-	case "darwin":
-		cmd = exec.Command("ps", "-Ao", "pid,comm")
-	default: // linux
-		cmd = exec.Command("ps", "-Ao", "pid,comm", "--no-headers")
-	}
-
+	cmd := listProcessesCmd(runtime.GOOS)
 	output, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("erreur commande: %w", err)
+		return nil, fmt.Errorf("erreur commande processus: %w", err)
 	}
 
-	procs := parseProcesses(string(output))
+	procs := parseProcesses(string(output), runtime.GOOS)
 	if topN > 0 && topN < len(procs) {
 		procs = procs[:topN]
 	}
@@ -59,7 +51,7 @@ func SearchProcesses(keyword string, topN int) ([]Process, error) {
 	return found, nil
 }
 
-// KillProcess demande confirmation avant de tuer un processus
+// KillProcess demande confirmation avant de tuer un processus.
 func KillProcess(pid int, outDir string, reader *bufio.Reader) error {
 	if pid <= 0 {
 		return fmt.Errorf("PID invalide: %d", pid)
@@ -75,16 +67,9 @@ func KillProcess(pid int, outDir string, reader *bufio.Reader) error {
 		return nil
 	}
 
-	var cmd *exec.Cmd
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("taskkill", "/PID", strconv.Itoa(pid), "/T")
-	default:
-		cmd = exec.Command("kill", strconv.Itoa(pid))
-	}
-
+	cmd := killProcessCmd(runtime.GOOS, pid)
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("impossible de tuer PID %d: %w", pid, err)
+		return fmt.Errorf("impossible d'arreter PID %d: %w", pid, err)
 	}
 
 	audit.Log(outDir, fmt.Sprintf("KILL PID=%d (%s)", pid, name))
@@ -101,9 +86,26 @@ func PrintProcesses(procs []Process) {
 	fmt.Printf("  Total: %d\n", len(procs))
 }
 
-// --- parsing de la sortie selon l'OS ---
+func listProcessesCmd(goos string) *exec.Cmd {
+	switch goos {
+	case "windows":
+		return exec.Command("tasklist", "/FO", "CSV", "/NH")
+	case "darwin":
+		return exec.Command("ps", "-Ao", "pid,comm")
+	default: // linux et autres unix
+		return exec.Command("ps", "-Ao", "pid,comm", "--no-headers")
+	}
+}
 
-func parseProcesses(output string) []Process {
+func killProcessCmd(goos string, pid int) *exec.Cmd {
+	pidStr := strconv.Itoa(pid)
+	if goos == "windows" {
+		return exec.Command("taskkill", "/PID", pidStr, "/T")
+	}
+	return exec.Command("kill", pidStr)
+}
+
+func parseProcesses(output, goos string) []Process {
 	var procs []Process
 	for _, line := range strings.Split(strings.TrimSpace(output), "\n") {
 		line = strings.TrimSpace(line)
@@ -111,7 +113,7 @@ func parseProcesses(output string) []Process {
 			continue
 		}
 		var p *Process
-		if runtime.GOOS == "windows" {
+		if goos == "windows" {
 			p = parseWindowsLine(line)
 		} else {
 			p = parseUnixLine(line)
@@ -125,16 +127,17 @@ func parseProcesses(output string) []Process {
 
 // format csv windows: "nom.exe","PID",...
 func parseWindowsLine(line string) *Process {
-	parts := strings.Split(line, ",")
-	if len(parts) < 2 {
+	r := csv.NewReader(strings.NewReader(line))
+	r.FieldsPerRecord = -1
+	rec, err := r.Read()
+	if err != nil || len(rec) < 2 {
 		return nil
 	}
-	name := strings.Trim(parts[0], "\"")
-	pid, err := strconv.Atoi(strings.Trim(parts[1], "\""))
+	pid, err := strconv.Atoi(strings.TrimSpace(rec[1]))
 	if err != nil {
 		return nil
 	}
-	return &Process{PID: pid, Name: name}
+	return &Process{PID: pid, Name: strings.TrimSpace(rec[0])}
 }
 
 // format unix: PID COMMAND

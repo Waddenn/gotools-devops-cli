@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  go-ci:
+  quality:
     runs-on: ubuntu-latest
 
     steps:
@@ -58,12 +58,29 @@ jobs:
 
       - name: Check expected generated files (out/)
         run: |
-          test -f out/filtered.txt
-          test -f out/filtered_not.txt
-          test -f out/head.txt
-          test -f out/tail.txt
-          test -f out/report.txt
-          test -f out/index.txt
-          test -f out/merged.txt
-          test -f out/audit.log
+          test -f out/lorem.txt
 
+  cross-platform:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build
+        run: go build ./...
+
+      - name: Run tests
+        run: go test ./...

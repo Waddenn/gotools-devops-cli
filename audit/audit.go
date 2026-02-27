@@ -3,12 +3,13 @@ package audit
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 )
 
 // Log ajoute une ligne horodatee dans out/audit.log
 func Log(outDir, action string) {
-	path := outDir + "/audit.log"
+	path := filepath.Join(outDir, "audit.log")
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erreur audit log: %v\n", err)

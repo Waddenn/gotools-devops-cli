@@ -39,6 +39,22 @@ Optionnel : charger un fichier de config précis.
 - `G` : vérifier l'espace disque restant
 - `H` : scanner plusieurs fichiers en parallèle (goroutines + `WaitGroup`)
 
+## Compatibilite OS
+
+Le projet est teste en CI sur `ubuntu-latest`, `macos-latest` et `windows-latest`.
+
+- `A` / `B` (FileOps) : compatible Linux/macOS/Windows
+- `C` (WebOps) : compatible Linux/macOS/Windows (acces reseau requis)
+- `D` (ProcOps) : commandes adaptees selon l'OS
+  - Windows : `tasklist`, `taskkill`
+  - macOS/Linux : `ps`, `kill`
+- `E` (SecureOps) : lockfile portable + changement de permissions
+- `F` (ContainerOps) : compatible Linux/macOS/Windows si Docker CLI est installe et actif
+- `G` (Etat disque) : compatible Linux/macOS/Windows (`df` sur Unix, `wmic`/PowerShell sur Windows)
+- `H` (Scan parallele) : compatible Linux/macOS/Windows
+
+En cas d'outil systeme manquant (ex: Docker non installe), le programme retourne une erreur claire.
+
 ## Structure du projet
 
 ```text
